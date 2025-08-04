@@ -62,8 +62,8 @@
                 <p class="text-slate-400 mt-2">Processing files... this might take a moment.</p>
             </div>
             <div id="result-list" class="space-y-4"></div>
-            <div id="total-count" class="mt-6 bg-indigo-900/50 p-4 rounded-lg hidden">
-                 <h3 class="text-xl font-bold text-slate-100 mb-3 text-center">Grand Totals</h3>
+            <div id="total-count" class="mt-6 bg-red-600 p-4 rounded-lg hidden">
+                 <h3 class="text-xl font-bold text-white mb-3 text-center">Grand Totals</h3>
                 <div id="total-stats-grid"></div>
             </div>
             <!-- Merge Section -->
@@ -264,13 +264,13 @@
 
             if (currentResults.length > 1) {
                 elements.totalStatsGrid.innerHTML = `
-                    <div class="stat-grid">
-                        <div><span class="text-slate-400 text-sm">Words</span><p class="font-semibold text-lg text-indigo-400">${totals.wordCount.toLocaleString()}</p></div>
-                        <div><span class="text-slate-400 text-sm">Pages</span><p class="font-semibold text-lg">${totals.pageCount.toLocaleString()}</p></div>
-                        <div><span class="text-slate-400 text-sm">Characters</span><p class="font-semibold text-lg">${totals.characterCount.toLocaleString()}</p></div>
-                        <div><span class="text-slate-400 text-sm">Sentences</span><p class="font-semibold text-lg">${totals.sentenceCount.toLocaleString()}</p></div>
-                        <div><span class="text-slate-400 text-sm">Paragraphs</span><p class="font-semibold text-lg">${totals.paragraphCount.toLocaleString()}</p></div>
-                        <div><span class="text-slate-400 text-sm">Reading Time</span><p class="font-semibold text-lg">${formatTime(totals.readingTime)}</p></div>
+                    <div class="stat-grid text-white">
+                        <div><span class="text-red-200 text-sm">Words</span><p class="font-semibold text-lg">${totals.wordCount.toLocaleString()}</p></div>
+                        <div><span class="text-red-200 text-sm">Pages</span><p class="font-semibold text-lg">${totals.pageCount.toLocaleString()}</p></div>
+                        <div><span class="text-red-200 text-sm">Characters</span><p class="font-semibold text-lg">${totals.characterCount.toLocaleString()}</p></div>
+                        <div><span class="text-red-200 text-sm">Sentences</span><p class="font-semibold text-lg">${totals.sentenceCount.toLocaleString()}</p></div>
+                        <div><span class="text-red-200 text-sm">Paragraphs</span><p class="font-semibold text-lg">${totals.paragraphCount.toLocaleString()}</p></div>
+                        <div><span class="text-red-200 text-sm">Reading Time</span><p class="font-semibold text-lg">${formatTime(totals.readingTime)}</p></div>
                     </div>`;
                 elements.totalCountDiv.classList.remove('hidden');
                 elements.mergeSection.classList.remove('hidden');
@@ -389,7 +389,7 @@
             return [h > 0 ? `${h}h` : '', m > 0 ? `${m}m` : '', s > 0 ? `${s}s` : ''].filter(Boolean).join(' ').trim() || '0s';
         };
         const formatBytes = (bytes, decimals = 2) => {
-            if (bytes === 0) return '0 Bytes';
+            if (!bytes || bytes === 0) return '0 Bytes';
             const k = 1024;
             const dm = decimals < 0 ? 0 : decimals;
             const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -398,7 +398,7 @@
         }
         const truncateFilename = (name, len) => name.length > len ? `${name.substring(0, len-15)}...${name.substring(name.length-10)}` : name;
         const downloadFile = (data, filename, type) => {
-            const blob = new Blob([data], { type: type });
+            const blob = new Blob([data], { type });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
