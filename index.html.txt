@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Word Counter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>PDF Word Counter 📄</h1>
+        <p>Upload one or more PDF files to count the words.</p>
+        
+        <div class="upload-box">
+            <input type="file" id="file-input" accept=".pdf" multiple>
+            <label for="file-input">Click to Select Files</label>
+        </div>
+
+        <div id="results-container">
+            </div>
+
+        <div id="summary">
+            </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
