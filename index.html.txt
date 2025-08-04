@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prompt: PDF Word Counter Web App</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6; 
+            color: #333; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 0 15px; 
+            background-color: #f9f9f9;
+        }
+        h1, h2, h3 { 
+            color: #0056b3; 
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+        code { 
+            background-color: #e4e4e4; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-family: "Courier New", Courier, monospace;
+        }
+        pre { 
+            background-color: #2d2d2d; 
+            color: #f8f8f2;
+            padding: 15px; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .feature-list { 
+            list-style-type: '✅'; 
+            padding-left: 20px;
+        }
+        .feature-list li {
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+        .note { 
+            border-left: 5px solid #ffc107; 
+            padding: 15px; 
+            background-color: #fffbe6; 
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        strong {
+            color: #d9534f;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>AI Prompt: Build a Client-Side PDF Word Count Tool</h1>
+
+    <h2>Project Goal</h2>
+    <p>Create a complete, single-page web application that functions as a PDF word counter. The entire application must be built with <strong>HTML, CSS, and vanilla JavaScript</strong>. All PDF processing and word counting must occur <strong>client-side</strong> in the user's browser to ensure file privacy. Please provide the final, runnable code in a single HTML file.</p>
+
+    <hr>
+
+    <h2>Core Features Breakdown</h2>
+
+    <h3>1. File Upload Functionality</h3>
+    <ul class="feature-list">
+        <li>Implement a file input that allows users to select <strong>one or multiple PDF files</strong> (`.pdf`) from their device at the same time.</li>
+        <li>Design a user-friendly upload area. A large, clickable button labeled "Select PDF Files" and/or a "Drag & Drop" zone would be perfect.</li>
+    </ul>
+
+    <h3>2. Client-Side PDF Processing & Word Counting</h3>
+    <ul class="feature-list">
+        <li>Use a JavaScript library to read and parse the PDF files directly in the browser. <strong>Mozilla's <code>pdf.js</code></strong> is the ideal choice. Please include it using a CDN link.</li>
+        <li>Once files are uploaded, your JavaScript code should handle them asynchronously.</li>
+        <li>For each PDF file, extract the complete text content from all of its pages.</li>
+        <li>Create a function that counts the words in the extracted text. A reliable method is to split the text by one or more whitespace characters (spaces, newlines, tabs) and then count the non-empty results.</li>
+    </ul>
+
+    <h3>3. Dynamic Results Display</h3>
+    <ul class="feature-list">
+        <li>Create a specific section on the page for displaying the results.</li>
+        <li>When a file is finished processing, dynamically add a new item to a results list or table.</li>
+        <li>Each item must clearly display the <strong>filename</strong> and its calculated <strong>word count</strong>. For example: "<code>MyDocument.pdf</code>: 2,415 words".</li>
+    </ul>
+
+    <h3>4. Grand Total Summary</h3>
+    <ul class="feature-list">
+        <li>Calculate the combined total word count from all uploaded PDFs.</li>
+        <li>Display this grand total in a highly visible area, such as a summary box at the top or bottom of the results list. For example: "<strong>Total Word Count: 8,970 words</strong>".</li>
+        <li>This total must update in real-time as each file is processed.</li>
+    </ul>
+
+    <hr>
+
+    <h2>Design and User Experience (UX) Requirements</h2>
+    <ul>
+        <li><strong>Layout & Style:</strong> The design should be clean, modern, and minimal. Use CSS to center the main container, apply good spacing, and ensure the page is responsive for both desktop and mobile screens.</li>
+        <li><strong>User Feedback:</strong> It is crucial to provide visual feedback during processing. When files are being parsed (which can take a moment for large files), display a loading spinner or a status message like "Processing..." to inform the user that the application is working.</li>
+        <li><strong>Clarity:</strong> The page structure should be intuitive. The three main components—uploader, individual results, and total summary—should be clearly separated and labeled.</li>
+    </ul>
+
+    <hr>
+
+    <h2>Required Technical Stack & Code Structure</h2>
+    <p>Please deliver all code (HTML, CSS, JS) in a single, self-contained <code>index.html</code> file. Follow this structure:</p>
+    <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;PDF Word Counter&lt;/title&gt;
+    &lt;style&gt;
+        /* All your CSS rules go here */
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- HTML for the main container, uploader, results display, etc. --&gt;
+
+    &lt;!-- CDN for pdf.js --&gt;
+    &lt;script src="https://mozilla.github.io/pdf.js/build/pdf.mjs" type="module"&gt;&lt;/script&gt;
+
+    &lt;script type="module"&gt;
+        // All custom JavaScript logic goes here.
+        // It must be an ES6 module to support the 'import' syntax.
+
+        // Import the library
+        import * as pdfjsLib from 'https://mozilla.github.io/pdf.js/build/pdf.mjs';
+
+        // Set up the worker
+        // This is required for pdf.js to work correctly
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.mjs';
+
+        // 1. Select DOM elements.
+        // 2. Set up the file input event listener.
+        // 3. Create the main handler function to process files.
+        // 4. Implement the text extraction and word counting logic using promises/async-await.
+        // 5. Create functions to update the UI with individual and total counts.
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+    <div class="note">
+        <p><strong>Critical Implementation Note:</strong> The most challenging aspect is handling the asynchronous nature of file reading and PDF parsing. Please ensure your code correctly uses Promises or <code>async/await</code> to manage multiple files without issues and to update the user interface smoothly as each operation completes.</p>
+    </div>
+
+</body>
+</html>
