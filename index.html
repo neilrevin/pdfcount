@@ -165,7 +165,7 @@
                 }
                 
                 const mergedPdfBytes = await mergedPdf.save();
-                downloadFile(mergedPdfBytes, 'merged.pdf', "application/pdf");
+                downloadFile(mergedPdfBytes, 'Books - .pdf', "application/pdf");
                 elements.mergeLoader.classList.add('hidden');
 
             } catch (error) {
@@ -398,7 +398,7 @@
         }
         const truncateFilename = (name, len) => name.length > len ? `${name.substring(0, len-15)}...${name.substring(name.length-10)}` : name;
         const downloadFile = (data, filename, type) => {
-            const blob = new Blob([data], { type });
+            const blob = new Blob([data], { type: type });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
