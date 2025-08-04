@@ -21,6 +21,24 @@
         .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
         [draggable="true"] { cursor: grab; }
         .dragging { opacity: 0.5; }
+        /* Progress bar styles */
+        .progress-bar-container {
+            width: 100%;
+            background-color: #374151; /* gray-700 */
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 20px;
+            width: 0%;
+            background-color: #4f46e5; /* indigo-600 */
+            border-radius: 9999px;
+            transition: width 0.4s ease;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            line-height: 20px;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-300 flex items-center justify-center min-h-screen p-4">
@@ -56,11 +74,14 @@
         <!-- Results Section -->
         <div id="results" class="mt-8 hidden">
             <h2 class="text-2xl font-bold text-slate-100 mb-4">Your Files</h2>
-            <p class="text-slate-400 mb-4 text-sm">Drag and drop files to reorder them for merging.</p>
-            <div id="loader" class="text-center hidden my-4">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-                <p class="text-slate-400 mt-2">Processing files... this might take a moment.</p>
+            <!-- Progress Bar Loader -->
+            <div id="loader" class="text-center hidden my-4 space-y-2">
+                <div class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <p id="progress-text" class="text-slate-400 text-sm">Processing files...</p>
             </div>
+            <p id="results-intro" class="text-slate-400 mb-4 text-sm hidden">Drag and drop files to reorder them for merging.</p>
             <div id="result-list" class="space-y-4"></div>
             <div id="total-count" class="mt-6 bg-red-600 p-4 rounded-lg hidden">
                  <h3 class="text-xl font-bold text-white mb-3 text-center">Grand Totals</h3>
@@ -77,6 +98,13 @@
                 </div>
             </div>
         </div>
+
+        <!-- Refresh Button -->
+        <div class="mt-12 text-center">
+            <button id="refreshButton" class="bg-red-800 text-red-200 text-xs font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                Start Over
+            </button>
+        </div>
     </div>
 
     <script>
@@ -92,10 +120,14 @@
             totalCountDiv: document.getElementById('total-count'),
             totalStatsGrid: document.getElementById('total-stats-grid'),
             loader: document.getElementById('loader'),
+            progressBar: document.getElementById('progress-bar'),
+            progressText: document.getElementById('progress-text'),
+            resultsIntro: document.getElementById('results-intro'),
             mergeSection: document.getElementById('merge-section'),
             mergeButton: document.getElementById('mergeButton'),
             mergeLoader: document.getElementById('merge-loader'),
             mergeSizeInfo: document.getElementById('merge-size-info'),
+            refreshButton: document.getElementById('refreshButton'),
         };
 
         let selectedFiles = [];
@@ -106,6 +138,7 @@
         elements.fileInput.addEventListener('change', handleFileSelection);
         elements.startButton.addEventListener('click', analyzeFiles);
         elements.mergeButton.addEventListener('click', mergeFiles);
+        elements.refreshButton.addEventListener('click', () => location.reload());
 
         function handleFileSelection(event) {
             let files = Array.from(event.target.files);
@@ -126,13 +159,23 @@
             if (selectedFiles.length === 0) return;
             setLoadingState(true);
             const fileResults = [];
-            for (const file of selectedFiles) {
+            for (const [index, file] of selectedFiles.entries()) {
                 const result = await processPdf(file);
                 fileResults.push({ name: file.name, size: file.size, ...result });
+                // Update progress bar
+                const progress = ((index + 1) / selectedFiles.length) * 100;
+                elements.progressBar.style.width = `${progress}%`;
+                elements.progressBar.textContent = `${Math.round(progress)}%`;
+                elements.progressText.textContent = `Processing ${truncateFilename(file.name, 25)}...`;
             }
             currentResults = fileResults;
             setLoadingState(false);
             displayResults();
+            
+            // Scroll to merge button after analysis
+            setTimeout(() => {
+                elements.mergeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
         }
 
         async function mergeFiles() {
@@ -212,6 +255,7 @@
         }
 
         function displayResults() {
+            elements.resultsIntro.classList.remove('hidden');
             elements.resultList.innerHTML = '';
             if (currentResults.length === 0) {
                 elements.resultsDiv.classList.add('hidden');
@@ -339,7 +383,13 @@
         function setLoadingState(isLoading) {
             if (isLoading) {
                 elements.resultsDiv.classList.remove('hidden');
+                elements.resultsIntro.classList.add('hidden');
+                elements.resultList.innerHTML = '';
+                elements.totalCountDiv.classList.add('hidden');
+                elements.mergeSection.classList.add('hidden');
                 elements.loader.classList.remove('hidden');
+                elements.progressBar.style.width = '0%';
+                elements.progressBar.textContent = '';
                 elements.startButton.disabled = true;
             } else {
                 elements.loader.classList.add('hidden');
