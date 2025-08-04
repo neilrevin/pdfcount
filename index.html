@@ -4,480 +4,201 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Word Counter</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script>
+        // Set the workerSrc for pdf.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        .file-list-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            width: 100%;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1em;
-        }
-
-        .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 40px;
-            text-align: center;
-            transition: all 0.3s ease;
-            background: #f8f9ff;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .upload-area:hover {
-            border-color: #764ba2;
-            background: #f0f2ff;
-            transform: scale(1.02);
-        }
-
-        .upload-area.dragover {
-            border-color: #764ba2;
-            background: #e8ebff;
-            transform: scale(1.05);
-        }
-
-        .upload-icon {
-            font-size: 60px;
-            color: #667eea;
-            margin-bottom: 20px;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .choose-files-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.1em;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-
-        .choose-files-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .choose-files-btn:active {
-            transform: translateY(0);
-        }
-
-        .file-list {
-            margin-top: 30px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .file-item {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
             justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .file-name {
-            font-weight: 500;
-            color: #333;
-            flex: 1;
-        }
-
-        .file-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .word-count {
-            background: #667eea;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 0.9em;
-            font-weight: 500;
-        }
-
-        .processing {
-            color: #667eea;
-            font-size: 0.9em;
-        }
-
-        .remove-btn {
-            background: #ff4757;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8em;
-            transition: all 0.3s ease;
-        }
-
-        .remove-btn:hover {
-            background: #ff3838;
-            transform: scale(1.1);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 30px;
-        }
-
-        .start-btn, .clear-btn {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 30px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .start-btn {
-            background: linear-gradient(135deg, #48c774 0%, #3ec46d 100%);
-            color: white;
-            box-shadow: 0 5px 15px rgba(72, 199, 116, 0.3);
-        }
-
-        .start-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(72, 199, 116, 0.4);
-        }
-
-        .start-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .clear-btn {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-        }
-
-        .clear-btn:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .total-result {
-            margin-top: 30px;
-            padding: 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            text-align: center;
-            color: white;
-            display: none;
-            animation: slideIn 0.5s ease;
-        }
-
-        .total-label {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-            opacity: 0.9;
-        }
-
-        .total-count {
-            font-size: 3em;
-            font-weight: bold;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Scrollbar Styles */
-        .file-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .file-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .file-list::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 10px;
-        }
-
-        .file-list::-webkit-scrollbar-thumb:hover {
-            background: #764ba2;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>📄 PDF Word Counter</h1>
-        <p class="subtitle">Upload your PDF files and get instant word counts</p>
+<body class="bg-slate-50 text-slate-800 flex items-center justify-center min-h-screen p-4">
 
-        <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📁</div>
-            <button class="choose-files-btn" onclick="document.getElementById('fileInput').click()">
-                Choose Files
-            </button>
-            <p style="color: #666; margin-top: 10px;">or drag and drop PDF files here</p>
-            <input type="file" id="fileInput" class="file-input" accept=".pdf" multiple>
+    <div class="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">PDF Word Counter</h1>
+            <p class="text-slate-500 mt-2">Upload your PDF files and get an instant word count.</p>
         </div>
 
-        <div class="file-list" id="fileList"></div>
+        <!-- File Upload Section -->
+        <div class="bg-slate-100 border-2 border-dashed border-slate-300 rounded-xl p-6 text-center">
+            <input type="file" id="fileInput" multiple accept=".pdf" class="hidden">
+            <label for="fileInput" class="cursor-pointer inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                Choose PDF Files
+            </label>
+            <p id="file-info" class="mt-4 text-sm text-slate-500">No files selected</p>
+        </div>
 
-        <div class="action-buttons">
-            <button class="start-btn" id="startBtn" onclick="startCounting()" disabled>
+        <!-- Action Button -->
+        <div class="mt-6 text-center">
+            <button id="startButton" class="w-full md:w-auto bg-green-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-600 transition-transform transform hover:scale-105 disabled:bg-slate-400 disabled:cursor-not-allowed disabled:transform-none" disabled>
                 Start Counting
             </button>
-            <button class="clear-btn" onclick="clearAll()">
-                Clear All
-            </button>
         </div>
 
-        <div class="total-result" id="totalResult">
-            <div class="total-label">Total Word Count</div>
-            <div class="total-count" id="totalCount">0</div>
+        <!-- Results Section -->
+        <div id="results" class="mt-8 hidden">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Results</h2>
+            <div id="loader" class="text-center hidden my-4">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <p class="text-slate-500 mt-2">Processing files... this might take a moment.</p>
+            </div>
+            <div id="result-table" class="bg-white rounded-lg overflow-hidden">
+                <!-- Results will be injected here -->
+            </div>
+            <div id="total-count" class="mt-6 bg-indigo-100 text-indigo-800 text-lg font-bold p-4 rounded-lg text-center hidden">
+                <!-- Total count will be injected here -->
+            </div>
         </div>
+
     </div>
 
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-        let uploadedFiles = [];
         const fileInput = document.getElementById('fileInput');
-        const uploadArea = document.getElementById('uploadArea');
-        const fileList = document.getElementById('fileList');
-        const startBtn = document.getElementById('startBtn');
-        const totalResult = document.getElementById('totalResult');
-        const totalCount = document.getElementById('totalCount');
+        const startButton = document.getElementById('startButton');
+        const fileInfo = document.getElementById('file-info');
+        const resultsDiv = document.getElementById('results');
+        const resultTable = document.getElementById('result-table');
+        const totalCountDiv = document.getElementById('total-count');
+        const loader = document.getElementById('loader');
 
-        // File input change handler
-        fileInput.addEventListener('change', handleFileSelect);
+        let selectedFiles = [];
 
-        // Drag and drop handlers
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
+        // --- Event Listeners ---
+
+        fileInput.addEventListener('change', (event) => {
+            selectedFiles = Array.from(event.target.files);
+            updateFileInfo();
+            startButton.disabled = selectedFiles.length === 0;
         });
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
+        startButton.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            
-            const files = Array.from(e.dataTransfer.files).filter(file => file.type === 'application/pdf');
-            addFiles(files);
-        });
+            // Reset UI for new processing
+            resultsDiv.classList.remove('hidden');
+            resultTable.innerHTML = '';
+            totalCountDiv.classList.add('hidden');
+            loader.classList.remove('hidden');
+            startButton.disabled = true;
 
-        function handleFileSelect(e) {
-            const files = Array.from(e.target.files);
-            addFiles(files);
-        }
-
-        function addFiles(files) {
-            files.forEach(file => {
-                if (!uploadedFiles.find(f => f.file.name === file.name)) {
-                    uploadedFiles.push({
-                        file: file,
-                        wordCount: null
-                    });
-                }
-            });
-            
-            updateFileList();
-            updateStartButton();
-        }
-
-        function updateFileList() {
-            fileList.innerHTML = '';
-            
-            uploadedFiles.forEach((fileObj, index) => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                
-                const fileName = document.createElement('div');
-                fileName.className = 'file-name';
-                fileName.textContent = fileObj.file.name;
-                
-                const fileStatus = document.createElement('div');
-                fileStatus.className = 'file-status';
-                
-                if (fileObj.wordCount !== null) {
-                    const wordCount = document.createElement('span');
-                    wordCount.className = 'word-count';
-                    wordCount.textContent = `${fileObj.wordCount.toLocaleString()} words`;
-                    fileStatus.appendChild(wordCount);
-                } else if (fileObj.processing) {
-                    const processing = document.createElement('span');
-                    processing.className = 'processing';
-                    processing.innerHTML = '<div class="spinner"></div> Processing...';
-                    fileStatus.appendChild(processing);
-                }
-                
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-btn';
-                removeBtn.textContent = '✕';
-                removeBtn.onclick = () => removeFile(index);
-                fileStatus.appendChild(removeBtn);
-                
-                fileItem.appendChild(fileName);
-                fileItem.appendChild(fileStatus);
-                fileList.appendChild(fileItem);
-            });
-        }
-
-        function removeFile(index) {
-            uploadedFiles.splice(index, 1);
-            updateFileList();
-            updateStartButton();
-            
-            if (uploadedFiles.length === 0) {
-                totalResult.style.display = 'none';
-            }
-        }
-
-        function updateStartButton() {
-            startBtn.disabled = uploadedFiles.length === 0;
-        }
-
-        async function startCounting() {
-            startBtn.disabled = true;
-            totalResult.style.display = 'none';
-            
-            for (let fileObj of uploadedFiles) {
-                if (fileObj.wordCount === null) {
-                    fileObj.processing = true;
-                    updateFileList();
-                    
-                    try {
-                        const wordCount = await countWordsInPDF(fileObj.file);
-                        fileObj.wordCount = wordCount;
-                        fileObj.processing = false;
-                    } catch (error) {
-                        console.error('Error processing file:', fileObj.file.name, error);
-                        fileObj.wordCount = 0;
-                        fileObj.processing = false;
-                    }
-                    
-                    updateFileList();
-                }
-            }
-            
-            // Calculate and show total
-            const total = uploadedFiles.reduce((sum, fileObj) => sum + (fileObj.wordCount || 0), 0);
-            totalCount.textContent = total.toLocaleString();
-            totalResult.style.display = 'block';
-            
-            startBtn.disabled = false;
-        }
-
-        async function countWordsInPDF(file) {
-            const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
             let totalWords = 0;
-            
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const textContent = await page.getTextContent();
-                const text = textContent.items.map(item => item.str).join(' ');
-                const words = text.match(/\b\w+\b/g) || [];
-                totalWords += words.length;
+            const fileResults = [];
+
+            // Process each file
+            for (const file of selectedFiles) {
+                const wordCount = await processPdf(file);
+                fileResults.push({ name: file.name, count: wordCount });
+                totalWords += wordCount;
             }
             
-            return totalWords;
+            // Hide loader and display results
+            loader.classList.add('hidden');
+            displayResults(fileResults, totalWords);
+            startButton.disabled = false;
+        });
+
+        // --- UI Update Functions ---
+
+        function updateFileInfo() {
+            if (selectedFiles.length === 0) {
+                fileInfo.textContent = 'No files selected';
+            } else if (selectedFiles.length === 1) {
+                fileInfo.textContent = `1 file selected: ${selectedFiles[0].name}`;
+            } else {
+                fileInfo.textContent = `${selectedFiles.length} files selected`;
+            }
         }
 
-        function clearAll() {
-            uploadedFiles = [];
-            fileInput.value = '';
-            updateFileList();
-            updateStartButton();
-            totalResult.style.display = 'none';
+        function displayResults(fileResults, totalWords) {
+            resultTable.innerHTML = ''; // Clear previous results
+            fileResults.forEach(result => {
+                const row = document.createElement('div');
+                row.className = 'file-list-item';
+                row.innerHTML = `
+                    <span class="text-slate-600 truncate pr-4">${result.name}</span>
+                    <span class="font-semibold text-indigo-600">${result.count.toLocaleString()} words</span>
+                `;
+                resultTable.appendChild(row);
+            });
+
+            if (fileResults.length > 1) {
+                totalCountDiv.textContent = `Total Word Count: ${totalWords.toLocaleString()}`;
+                totalCountDiv.classList.remove('hidden');
+            }
         }
+
+        // --- PDF Processing Logic ---
+
+        /**
+         * Reads a PDF file and counts the words.
+         * @param {File} file - The PDF file to process.
+         * @returns {Promise<number>} The total word count in the PDF.
+         */
+        async function processPdf(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    try {
+                        const pdfData = new Uint8Array(event.target.result);
+                        const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                        let totalWords = 0;
+
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const pageText = textContent.items.map(item => item.str).join(' ');
+                            totalWords += countWordsInText(pageText);
+                        }
+                        resolve(totalWords);
+                    } catch (error) {
+                        console.error(`Error processing ${file.name}:`, error);
+                        // Display an error for this specific file
+                        const row = document.createElement('div');
+                        row.className = 'file-list-item';
+                        row.innerHTML = `
+                            <span class="text-red-600 truncate pr-4">${file.name}</span>
+                            <span class="font-semibold text-red-500">Error processing file</span>
+                        `;
+                        resultTable.appendChild(row);
+                        resolve(0); // Resolve with 0 words on error to not break the total
+                    }
+                };
+                reader.onerror = (error) => {
+                    console.error('FileReader error:', error);
+                    reject(error);
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        /**
+         * Counts words in a given string.
+         * @param {string} text - The text to count words from.
+         * @returns {number} The number of words.
+         */
+        function countWordsInText(text) {
+            if (!text) return 0;
+            // Use regex to find sequences of non-whitespace characters
+            const words = text.match(/\S+/g);
+            return words ? words.length : 0;
+        }
+
     </script>
 </body>
 </html>
